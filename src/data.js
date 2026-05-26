@@ -33,7 +33,7 @@ export const data = {
       type: 'E-commerce',
       description: 'Tienda de ropa full stack con catálogo filtrable, carrito de compras, detalle de producto y checkout con guardado de pedidos.',
       stack: ['React', 'Node.js', 'Express', 'React Router'],
-      demo: 'https://shopflow-frontend-two.vercel.app/',
+      demo: 'https://shop-flow-frontend-plum.vercel.app/',
       github: 'https://github.com/Mottabronx/ShopFlow',
       color: '#1a1a2e',
       accent: '#c8572a',
