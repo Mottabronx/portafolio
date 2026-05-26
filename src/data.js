@@ -37,18 +37,7 @@ export const data = {
       github: 'https://github.com/Mottabronx/ShopFlow',
       color: '#1a1a2e',
       accent: '#c8572a',
-    },
-    {
-      id: 3,
-      name: 'AdminPanel',
-      type: 'Dashboard',
-      description: 'Panel de administración para ShopFlow con métricas de ventas, gráficos de ingresos por día y categoría, y tablas de pedidos.',
-      stack: ['React', 'Vite', 'Canvas API', 'CSS Modules'],
-      demo: '#',
-      github: 'https://github.com/Mottabronx/AdminPanel-ShopFlow',
-      color: '#0a0b10',
-      accent: '#6c63ff',
-    },
+    }
   ],
 
   services: [
