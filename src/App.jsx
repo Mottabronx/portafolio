@@ -1,110 +1,189 @@
-import { useState, useEffect } from 'react'
-import { data } from './data'
+import { useEffect, useRef, useState } from 'react'
+import { content, profile } from './content'
 import styles from './App.module.css'
 
-// ── Avatar con iniciales ──────────────────────────────────
-function Avatar() {
-  return (
-    <div className={styles.avatar}>
-      <span className={styles.avatarInitials}>{data.initials}</span>
-    </div>
-  )
+function useReveal() {
+  const ref = useRef(null)
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const targets = el.querySelectorAll('[data-reveal]')
+    if (!('IntersectionObserver' in window)) {
+      targets.forEach((t) => t.classList.add(styles.shown))
+      return
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            e.target.classList.add(styles.shown)
+            io.unobserve(e.target)
+          }
+        })
+      },
+      { threshold: 0.12, rootMargin: '0px 0px -8% 0px' }
+    )
+    targets.forEach((t) => io.observe(t))
+    return () => io.disconnect()
+  }, [])
+  return ref
 }
 
-// ── Navbar ────────────────────────────────────────────────
-function Navbar({ activeSection }) {
+function Nav({ t, lang, onLang }) {
   const [scrolled, setScrolled] = useState(false)
   useEffect(() => {
-    const fn = () => setScrolled(window.scrollY > 40)
-    window.addEventListener('scroll', fn)
+    const fn = () => setScrolled(window.scrollY > 24)
+    fn()
+    window.addEventListener('scroll', fn, { passive: true })
     return () => window.removeEventListener('scroll', fn)
   }, [])
 
   return (
-    <nav className={`${styles.nav} ${scrolled ? styles.navScrolled : ''}`}>
-      <span className={styles.navLogo}>{data.name.split(' ')[0]}<span>.</span></span>
-      <div className={styles.navLinks}>
-        {['proyectos', 'servicios', 'sobre-mi', 'contacto'].map(s => (
-          <a key={s} href={`#${s}`} className={activeSection === s ? styles.navActive : ''}>
-            {s.replace('-', ' ')}
-          </a>
+    <header className={`${styles.nav} ${scrolled ? styles.navScrolled : ''}`}>
+      <a href="#inicio" className={styles.brand} aria-label={profile.name}>
+        <span className={styles.stamp} aria-hidden="true">{profile.initials}</span>
+        <span className={styles.brandName}>{profile.name}</span>
+      </a>
+      <nav className={styles.navLinks} aria-label="Principal">
+        {t.nav.map((l) => (
+          <a key={l.id} href={`#${l.id}`}>{l.label}</a>
         ))}
+      </nav>
+      <div className={styles.navSide}>
+        <button type="button" className={styles.langBtn} onClick={onLang} aria-label="Cambiar idioma / Switch language">
+          {t.langLabel}
+        </button>
+        <a href={profile.cv} target="_blank" rel="noreferrer" className={styles.cvBtn}>{t.cvLabel}</a>
+        <a href="#contacto" className={styles.navCta}>{t.navCta}</a>
       </div>
-      <a href={`mailto:${data.email}`} className={styles.navCta}>Contactar</a>
-    </nav>
+    </header>
   )
 }
 
-// ── Hero ──────────────────────────────────────────────────
-function Hero() {
+function Hero({ t }) {
+  const [copied, setCopied] = useState(false)
+  const copyEmail = async () => {
+    try {
+      await navigator.clipboard.writeText(profile.email)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1800)
+    } catch {
+      window.location.href = `mailto:${profile.email}`
+    }
+  }
+
   return (
-    <section className={styles.hero}>
-      <div className={styles.heroInner}>
-        <div className={styles.heroLeft}>
-          <p className={styles.heroTag}>
-            <span className={styles.dot} /> Disponible para proyectos
-          </p>
-          <h1 className={styles.heroTitle}>
-            Desarrollo web
-            <em> que funciona</em>
-            <br />y se ve bien.
-          </h1>
-          <p className={styles.heroSub}>
-            Full stack developer en Santiago. React, Node.js y buenas ideas para llevar tu negocio online.
-          </p>
+    <section className={styles.hero} id="inicio">
+      <div className={styles.heroGrid}>
+        <div className={styles.heroMain}>
+          <p className={styles.seal}><span className={styles.sealDot} aria-hidden="true" />{t.seal}</p>
+          <p className={styles.kicker}>{t.heroKicker}</p>
+          <h1 className={styles.heroTitle}>{t.heroTitle}</h1>
+          <p className={styles.heroSub}>{t.heroSub}</p>
           <div className={styles.heroActions}>
-            <a href="#proyectos" className={styles.btnPrimary}>Ver proyectos</a>
-            <a href="#contacto" className={styles.btnGhost}>Hablemos</a>
+            <a href="#proyectos" className={styles.btnSolid}>{t.primaryCta}</a>
+            <button type="button" className={styles.btnLine} onClick={copyEmail} aria-live="polite">
+              {copied ? t.copied : t.secondaryCta}
+            </button>
           </div>
+          <p className={styles.heroMail}>{profile.email}</p>
         </div>
-        <div className={styles.heroRight}>
-          <Avatar />
-          <div className={styles.heroCard}>
-            <span className={styles.heroCardLabel}>Stack principal</span>
-            <div className={styles.heroTags}>
-              {data.stack.slice(0, 6).map(s => (
-                <span key={s} className={styles.heroTag2}>{s}</span>
-              ))}
-            </div>
+        <aside className={styles.specSheet} aria-label="Spec sheet">
+          <div className={styles.specHead}>
+            <span>{profile.initials} — {profile.name}</span>
+            <span className={styles.specIndex}>FT-01</span>
           </div>
-        </div>
+          <dl>
+            {t.specs.map(([k, v]) => (
+              <div key={k} className={styles.specRow}>
+                <dt>{k}</dt>
+                <dd>{v}</dd>
+              </div>
+            ))}
+          </dl>
+        </aside>
       </div>
     </section>
   )
 }
 
-// ── Projects ──────────────────────────────────────────────
-function Projects() {
+function Projects({ t }) {
+  const [p1, p2] = t.projects
   return (
-    <section className={styles.section} id="proyectos">
-      <div className={styles.sectionHeader}>
-        <span className={styles.sectionNum}>01</span>
-        <h2 className={styles.sectionTitle}>Proyectos</h2>
+    <section className={styles.block} id="proyectos" data-reveal>
+      <div className={styles.blockHead}>
+        <h2>{t.projectsTitle}</h2>
+        <p>{t.projectsIntro}</p>
       </div>
-      <div className={styles.projectsGrid}>
-        {data.projects.map((p, i) => (
-          <div key={p.id} className={styles.projectCard} style={{ animationDelay: `${i * 80}ms` }}>
-            <div className={styles.projectPreview} style={{ background: p.color }}>
-              <div className={styles.projectAccentBar} style={{ background: p.accent }} />
-              <span className={styles.projectPreviewName} style={{ color: p.accent }}>{p.name}</span>
-            </div>
-            <div className={styles.projectInfo}>
-              <p className={styles.projectType}>{p.type}</p>
-              <h3 className={styles.projectName}>{p.name}</h3>
-              <p className={styles.projectDesc}>{p.description}</p>
-              <div className={styles.projectTags}>
-                {p.stack.map(s => <span key={s} className={styles.projectTag}>{s}</span>)}
-              </div>
-              <div className={styles.projectLinks}>
-                {p.demo !== '#' && (
-                  <a href={p.demo} target="_blank" rel="noreferrer" className={styles.btnSmall}>
-                    Demo ↗
-                  </a>
-                )}
-                <a href={p.github} target="_blank" rel="noreferrer" className={styles.btnSmallGhost}>
-                  GitHub
-                </a>
-              </div>
+
+      <article className={styles.featured}>
+        <div className={styles.shotWrap}>
+          <img
+            src="/weathernow.png"
+            alt="Captura de WeatherNow mostrando el clima de Santiago"
+            loading="lazy"
+          />
+        </div>
+        <div className={styles.featuredBody}>
+          <p className={styles.projKind}>{p1.kind}</p>
+          <h3>{p1.name}</h3>
+          <p className={styles.projSummary}>{p1.summary}</p>
+          <ul className={styles.builtList}>
+            {p1.built.map((b) => <li key={b}>{b}</li>)}
+          </ul>
+          <div className={styles.tagRow}>
+            {p1.stack.map((s) => <span key={s}>{s}</span>)}
+          </div>
+          <div className={styles.projLinks}>
+            <a href={p1.demo} target="_blank" rel="noreferrer" className={styles.btnSolid}>{t.viewLive}</a>
+            <a href={p1.github} target="_blank" rel="noreferrer" className={styles.btnLine}>{t.viewCode}</a>
+          </div>
+        </div>
+      </article>
+
+      <article className={styles.featured}>
+        <div className={styles.shotWrap}>
+          <img
+            src="/shopflow.png"
+            alt="Captura de ShopFlow mostrando el catálogo de la tienda"
+            loading="lazy"
+          />
+        </div>
+        <div className={styles.featuredBody}>
+          <p className={styles.projKind}>{p2.kind}</p>
+          <h3>{p2.name}</h3>
+          <p className={styles.projSummary}>{p2.summary}</p>
+          <ul className={styles.builtList}>
+            {p2.built.map((b) => <li key={b}>{b}</li>)}
+          </ul>
+          <div className={styles.tagRow}>
+            {p2.stack.map((s) => <span key={s}>{s}</span>)}
+          </div>
+          <div className={styles.projLinks}>
+            <a href={p2.demo} target="_blank" rel="noreferrer" className={styles.btnSolid}>{t.viewLive}</a>
+            <a href={p2.github} target="_blank" rel="noreferrer" className={styles.btnLine}>{t.viewCode}</a>
+          </div>
+        </div>
+      </article>
+    </section>
+  )
+}
+
+function Path({ t }) {
+  return (
+    <section className={styles.block} id="trayectoria" data-reveal>
+      <div className={styles.blockHead}>
+        <h2>{t.pathTitle}</h2>
+        <p>{t.pathIntro}</p>
+      </div>
+      <div className={styles.logTable} role="table" aria-label={t.pathTitle}>
+        {t.path.map((p) => (
+          <div key={p.period} className={styles.logRow} role="row">
+            <span className={styles.logPeriod} role="cell">{p.period}</span>
+            <div role="cell">
+              <p className={styles.logRole}>{p.role}</p>
+              <p className={styles.logPlace}>{p.place}</p>
+              <p className={styles.logDetail}>{p.detail}</p>
             </div>
           </div>
         ))}
@@ -113,22 +192,23 @@ function Projects() {
   )
 }
 
-// ── Services ──────────────────────────────────────────────
-function Services() {
+function Stack({ t }) {
   return (
-    <section className={`${styles.section} ${styles.sectionDark}`} id="servicios">
-      <div className={styles.sectionHeader}>
-        <span className={styles.sectionNum} style={{ color: '#888' }}>02</span>
-        <h2 className={styles.sectionTitle} style={{ color: '#fff' }}>Servicios</h2>
+    <section className={styles.block} id="stack" data-reveal>
+      <div className={styles.blockHead}>
+        <h2>{t.stackTitle}</h2>
+        <p>{t.stackIntro}</p>
       </div>
-      <div className={styles.servicesGrid}>
-        {data.services.map((s, i) => (
-          <div key={i} className={styles.serviceCard}>
-            <div className={styles.serviceTop}>
-              <h3 className={styles.serviceName}>{s.name}</h3>
-              <span className={styles.servicePrice}>{s.price}</span>
+      <div className={styles.stackGrid}>
+        {t.stackGroups.map((g) => (
+          <div key={g.name} className={styles.stackCol}>
+            <div className={styles.stackColHead}>
+              <h3>{g.name}</h3>
+              <span>{g.note}</span>
             </div>
-            <p className={styles.serviceDesc}>{s.desc}</p>
+            <ul>
+              {g.items.map((i) => <li key={i}>{i}</li>)}
+            </ul>
           </div>
         ))}
       </div>
@@ -136,114 +216,87 @@ function Services() {
   )
 }
 
-// ── About ─────────────────────────────────────────────────
-function About() {
+function About({ t }) {
   return (
-    <section className={styles.section} id="sobre-mi">
-      <div className={styles.sectionHeader}>
-        <span className={styles.sectionNum}>03</span>
-        <h2 className={styles.sectionTitle}>Sobre mí</h2>
+    <section className={styles.block} id="sobre-mi" data-reveal>
+      <div className={styles.blockHead}>
+        <h2>{t.aboutTitle}</h2>
       </div>
       <div className={styles.aboutGrid}>
         <div className={styles.aboutText}>
-          {data.about.map((p, i) => <p key={i}>{p}</p>)}
-          <div className={styles.aboutStack}>
-            {data.stack.map(s => (
-              <span key={s} className={styles.stackTag}>{s}</span>
-            ))}
-          </div>
+          {t.about.map((p) => <p key={p.slice(0, 24)}>{p}</p>)}
         </div>
-        <div className={styles.aboutRight}>
-          <div className={styles.aboutInfo}>
-            <div className={styles.aboutInfoItem}>
-              <span className={styles.aboutInfoLabel}>Ubicación</span>
-              <span>{data.location}</span>
+        <dl className={styles.factList}>
+          {t.facts.map(([k, v]) => (
+            <div key={k}>
+              <dt>{k}</dt>
+              <dd>{v}</dd>
             </div>
-            <div className={styles.aboutInfoItem}>
-              <span className={styles.aboutInfoLabel}>Disponibilidad</span>
-              <span className={styles.available}>● Disponible ahora</span>
-            </div>
-            <div className={styles.aboutInfoItem}>
-              <span className={styles.aboutInfoLabel}>Modalidad</span>
-              <span>Remoto / presencial</span>
-            </div>
-            <div className={styles.aboutInfoItem}>
-              <span className={styles.aboutInfoLabel}>Respuesta</span>
-              <span>Menos de 24 horas</span>
-            </div>
-          </div>
-        </div>
+          ))}
+        </dl>
       </div>
     </section>
   )
 }
 
-// ── Contact ───────────────────────────────────────────────
-function Contact() {
+function Contact({ t }) {
+  const [copied, setCopied] = useState(false)
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(profile.email)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1800)
+    } catch {
+      window.location.href = `mailto:${profile.email}`
+    }
+  }
   return (
-    <section className={styles.section} id="contacto">
-      <div className={styles.sectionHeader}>
-        <span className={styles.sectionNum}>04</span>
-        <h2 className={styles.sectionTitle}>Contacto</h2>
-      </div>
+    <section className={styles.block} id="contacto" data-reveal>
       <div className={styles.contactBox}>
-        <h3 className={styles.contactTitle}>
-          ¿Tienes un proyecto<br />en mente?
-        </h3>
-        <p className={styles.contactSub}>
-          Cuéntame qué necesitas y te respondo con una propuesta en menos de 24 horas.
-        </p>
+        <h2>{t.contactTitle}</h2>
+        <p className={styles.contactLead}>{t.contactLead}</p>
+        <div className={styles.contactMailRow}>
+          <a className={styles.mailBig} href={`mailto:${profile.email}`}>{profile.email}</a>
+          <button type="button" className={styles.btnLine} onClick={copy} aria-live="polite">
+            {copied ? t.copied : t.secondaryCta}
+          </button>
+        </div>
+        <p className={styles.contactNote}>{t.contactNote}</p>
         <div className={styles.contactLinks}>
-          <a href={`mailto:${data.email}`} className={styles.contactLink}>
-            <span>✉</span> {data.email}
-          </a>
-          <a href={data.whatsapp} target="_blank" rel="noreferrer" className={styles.contactLink}>
-            <span>💬</span> WhatsApp
-          </a>
-          <a href={data.github} target="_blank" rel="noreferrer" className={styles.contactLink}>
-            <span>⌥</span> GitHub
-          </a>
-          <a href={data.linkedin} target="_blank" rel="noreferrer" className={styles.contactLink}>
-            <span>👔</span> LinkedIn
-          </a>
+          <a href={profile.github} target="_blank" rel="noreferrer">GitHub</a>
+          <a href={profile.linkedin} target="_blank" rel="noreferrer">LinkedIn</a>
+          <a href={profile.cv} target="_blank" rel="noreferrer">{t.cvLabel}</a>
+          <span className={styles.contactLoc}>{profile.location}</span>
         </div>
       </div>
     </section>
   )
 }
 
-// ── Footer ────────────────────────────────────────────────
-function Footer() {
-  return (
-    <footer className={styles.footer}>
-      <span>{data.name} · {new Date().getFullYear()}</span>
-      <span>Hecho con React</span>
-    </footer>
-  )
-}
-
-// ── App ───────────────────────────────────────────────────
 export default function App() {
-  const [activeSection, setActiveSection] = useState('')
+  const [lang, setLang] = useState('es')
+  const t = content[lang]
+  const rootRef = useReveal()
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      entries => entries.forEach(e => { if (e.isIntersecting) setActiveSection(e.target.id) }),
-      { threshold: 0.4 }
-    )
-    document.querySelectorAll('section[id]').forEach(s => observer.observe(s))
-    return () => observer.disconnect()
-  }, [])
+    document.documentElement.lang = lang
+  }, [lang])
 
   return (
-    <>
-      <Navbar activeSection={activeSection} />
-      <Hero />
-      <Projects />
-      <Services />
-      <About />
-      <Contact />
-      <Footer />
-    </>
+    <div ref={rootRef}>
+      <a className="skipLink" href="#inicio">{lang === 'es' ? 'Saltar al contenido' : 'Skip to content'}</a>
+      <Nav t={t} lang={lang} onLang={() => setLang((l) => (l === 'es' ? 'en' : 'es'))} />
+      <main className={styles.page}>
+        <Hero t={t} />
+        <Projects t={t} />
+        <Path t={t} />
+        <Stack t={t} />
+        <About t={t} />
+        <Contact t={t} />
+      </main>
+      <footer className={styles.footer}>
+        <span>{profile.name} · {new Date().getFullYear()} · {profile.location}</span>
+      </footer>
+    </div>
   )
 }
