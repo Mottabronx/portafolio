@@ -247,21 +247,6 @@
   display: block;
 }
 
-/* ── Trayectoria ─────────────────────── */
-.logTable { border: 1px solid var(--line-strong); background: var(--card); }
-.logRow {
-  display: grid;
-  grid-template-columns: 200px 1fr;
-  gap: 24px;
-  padding: 24px 28px;
-  border-bottom: 1px solid var(--line);
-}
-.logRow:last-child { border-bottom: none; }
-.logPeriod { font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink); font-weight: 500; }
-.logRole { font-weight: 700; font-size: 1.05rem; }
-.logPlace { font-family: var(--font-mono); font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
-.logDetail { color: var(--ink-soft); margin-top: 8px; max-width: 62ch; }
-
 /* ── Stack ───────────────────────────── */
 .stackGrid {
   display: grid;
@@ -362,7 +347,6 @@
   .stackCol { border-right: none; border-bottom: 1px solid var(--line); }
   .stackCol:last-child { border-bottom: none; }
   .aboutGrid { grid-template-columns: 1fr; }
-  .logRow { grid-template-columns: 1fr; gap: 8px; }
   .footer { padding: 18px 24px 24px; }
 }
 

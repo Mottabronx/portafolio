@@ -13,7 +13,6 @@ export const content = {
     langLabel: 'EN',
     nav: [
       { id: 'proyectos', label: 'Proyectos' },
-      { id: 'trayectoria', label: 'Trayectoria' },
       { id: 'stack', label: 'Stack' },
       { id: 'sobre-mi', label: 'Sobre mí' },
     ],
@@ -66,24 +65,6 @@ export const content = {
         github: 'https://github.com/Mottabronx/ShopFlow',
       },
     ],
-    pathTitle: 'Trayectoria',
-    pathIntro: 'Registro breve. Sin relleno: lo que he hecho y dónde estoy.',
-    path: [
-      {
-        period: '2024 — ahora',
-        role: 'Desarrollador full stack · Independiente',
-        place: 'Santiago / Remoto',
-        detail:
-          'Diseño y desarrollo de apps con React y Node. Dos productos publicados, despliegue y mantención propios.',
-      },
-      {
-        period: '2023 — 2024',
-        role: 'Formación intensiva · Proyectos aplicados',
-        place: 'Autodidacta',
-        detail:
-          'JavaScript moderno, React, APIs REST con Express, Git y despliegue. Cada módulo terminó en un proyecto desplegado.',
-      },
-    ],
     stackTitle: 'Stack',
     stackIntro: 'Lo que uso en producción hoy, agrupado por dónde lo aplico.',
     stackGroups: [
@@ -110,7 +91,6 @@ export const content = {
     langLabel: 'ES',
     nav: [
       { id: 'proyectos', label: 'Projects' },
-      { id: 'trayectoria', label: 'Background' },
       { id: 'stack', label: 'Stack' },
       { id: 'sobre-mi', label: 'About' },
     ],
@@ -161,22 +141,6 @@ export const content = {
         stack: ['React', 'Node.js', 'Express', 'React Router'],
         demo: 'https://shop-flow-frontend-plum.vercel.app/',
         github: 'https://github.com/Mottabronx/ShopFlow',
-      },
-    ],
-    pathTitle: 'Background',
-    pathIntro: 'Short log. No filler: what I have done and where I am.',
-    path: [
-      {
-        period: '2024 — now',
-        role: 'Full stack developer · Independent',
-        place: 'Santiago / Remote',
-        detail: 'Design and development of apps with React and Node. Two shipped products, own deployment and maintenance.',
-      },
-      {
-        period: '2023 — 2024',
-        role: 'Intensive training · Applied projects',
-        place: 'Self-taught',
-        detail: 'Modern JavaScript, React, REST APIs with Express, Git and deployment. Every module ended in a deployed project.',
       },
     ],
     stackTitle: 'Stack',

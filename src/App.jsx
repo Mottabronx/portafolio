@@ -169,29 +169,6 @@ function Projects({ t }) {
   )
 }
 
-function Path({ t }) {
-  return (
-    <section className={styles.block} id="trayectoria" data-reveal>
-      <div className={styles.blockHead}>
-        <h2>{t.pathTitle}</h2>
-        <p>{t.pathIntro}</p>
-      </div>
-      <div className={styles.logTable} role="table" aria-label={t.pathTitle}>
-        {t.path.map((p) => (
-          <div key={p.period} className={styles.logRow} role="row">
-            <span className={styles.logPeriod} role="cell">{p.period}</span>
-            <div role="cell">
-              <p className={styles.logRole}>{p.role}</p>
-              <p className={styles.logPlace}>{p.place}</p>
-              <p className={styles.logDetail}>{p.detail}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
-  )
-}
-
 function Stack({ t }) {
   return (
     <section className={styles.block} id="stack" data-reveal>
@@ -289,7 +266,6 @@ export default function App() {
       <main className={styles.page}>
         <Hero t={t} />
         <Projects t={t} />
-        <Path t={t} />
         <Stack t={t} />
         <About t={t} />
         <Contact t={t} />
